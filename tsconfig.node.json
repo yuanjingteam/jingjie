@@ -8,6 +8,7 @@
     "playwright.config.*",
     "eslint.config.*"
   ],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "noEmit": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",

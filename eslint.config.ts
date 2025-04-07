@@ -23,6 +23,8 @@ export default defineConfigWithVueTs(
     rules: {
       'vue/multi-word-component-names': 'off',
       'no-undef': 'error',
+      'no-console': 'off',
+      'console/no-console': 'error',
       // 'vue/multi-word-component-names': [
       //   'warn',
       //   {
@@ -31,5 +33,6 @@ export default defineConfigWithVueTs(
       // ],
       // 'vue/no-setup-props-destructure
     },
+    
   },
 )
