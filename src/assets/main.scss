@@ -1,11 +1,11 @@
-body {
-  margin: 0;
-  // background-color: #f5f5f5;
-}
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  cursor: default;
+}
+body {
+  background-color: #171b22;
 }
 /* fade-slide */
 .fade-leave-active,

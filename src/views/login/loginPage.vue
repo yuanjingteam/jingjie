@@ -50,6 +50,7 @@ const enterfn = async () => {
       userStore.setUserInfo({ username: form.user, password: transPass.value, uid: uid })
     }
     userStore.setToken(transPass.value)
+    ElMessage.success('登录成功')
     router.push('/')
   }
 }
