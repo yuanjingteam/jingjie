@@ -8,17 +8,31 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    BasicBar: typeof import('./src/components/echarts/basicBar.vue')['default']
+    BasicDoughnut: typeof import('./src/components/echarts/basicDoughnut.vue')['default']
+    Basichbar: typeof import('./src/components/echarts/basichbar.vue')['default']
+    BasicLine: typeof import('./src/components/echarts/basicLine.vue')['default']
+    Basicpie: typeof import('./src/components/echarts/basicpie.vue')['default']
+    ChinaMap: typeof import('./src/components/echarts/chinaMap.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
+    ElColorPicker: typeof import('element-plus/es')['ElColorPicker']
     ElConfigProvider: typeof import('element-plus/es')['ElConfigProvider']
+    ElDialog: typeof import('element-plus/es')['ElDialog']
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
     ElInput: typeof import('element-plus/es')['ElInput']
     ElMenu: typeof import('element-plus/es')['ElMenu']
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
+    ElOption: typeof import('element-plus/es')['ElOption']
     ElPagination: typeof import('element-plus/es')['ElPagination']
+    ElSelect: typeof import('element-plus/es')['ElSelect']
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
+    ElTooltip: typeof import('element-plus/es')['ElTooltip']
+    PublicVue: typeof import('./src/components/publicVue.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    'Vue3.rulerTool': typeof import('./src/components/vue3.ruler-tool.vue')['default']
+    Vue3RulerTool: typeof import('./src/components/vue3-ruler-tool.vue')['default']
   }
 }
