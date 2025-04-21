@@ -146,8 +146,8 @@ const presetLine = ref([
 ])
 const boardState = reactive({
   select: '1',
-  w: 1152,
-  h: 648,
+  w: 1920,
+  h: 1080,
   bgcolor: '',
   present: 60,
   scale: 1,
@@ -195,7 +195,13 @@ onMounted(async () => {
   const {
     data: { data },
   } = await countGetDetail(route.params.id as string)
+  console.log(data)
   title.value = data.title
+  img = data.image
+  boardState.bgcolor = data.chartData.bgcolor
+  boardState.w = data.chartData.w
+  boardState.h = data.chartData.h
+  components.push(...data.chartData.elements)
 })
 // 发布逻辑
 const publicControl = ref<{ ifshow: () => void } | null>(null)

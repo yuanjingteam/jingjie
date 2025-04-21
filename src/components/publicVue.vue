@@ -91,7 +91,7 @@ onMounted(() => {
   if (!chartRef.value) return
   // 注册地图
   if (props.type) {
-    echarts.registerMap('china', chinaGeoJSON)
+    echarts.registerMap('china', chinaGeoJSON as any)
   }
   // 初始化图表（带高清屏适配）
   chartInstance = initECharts(chartRef.value)
