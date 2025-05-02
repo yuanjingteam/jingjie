@@ -121,17 +121,6 @@ const handleResizing = (val: { w: number; h: number }) => {
   emits('update:h', val.h)
   resize()
 }
-// 监听opionData的变化
-// watch(
-//   props.optionData,
-//   (new1) => {
-//     console.log('props.optionData改变', props.optionData)
-//     console.log(new1)
-//     resize()
-//     emits('getOption', props.optionData)
-//   },
-//   { deep: true },
-// )
 watch(
   () => props.optionData, // 改用函数返回
   (new1) => {
@@ -139,7 +128,6 @@ watch(
     chartInstance?.setOption(new1) // 关键：更新图表
     console.log(props.optionData)
     emits('getOption', props.optionData)
-    // resize()
   },
   { deep: true, immediate: true }, // 补充 immediate 确保初始化触发
 )

@@ -30,29 +30,13 @@ const router = createRouter({
         },
       ],
     },
-    // {
-    //   path: '/view',
-    //   component: () => import('@/views/data/dataView.vue'),
-    // },
-    // {
-    //   path: '/edit',
-    //   component: () => import('@/views/data/dataEdit.vue'),
-    // },
-    // {
-    //   path: '/edit',
-    //   component: () => import('@/views//data/dataEdit2.vue'),
-    // },
     {
       path: '/edit/:id',
-      component: () => import('@/views/data/dataEdit3.vue'),
+      component: () => import('@/views/data/dataEdit.vue'),
     },
     {
       path: '/view/:id',
-      component: () => import('@/views/data/dataView2.vue'),
-    },
-    {
-      path: '/ttt',
-      component: () => import('@/views/data/test.vue'),
+      component: () => import('@/views/data/dataView.vue'),
     },
   ],
 })

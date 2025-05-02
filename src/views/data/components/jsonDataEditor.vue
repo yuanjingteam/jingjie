@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
-
 const dialogTableVisible = ref(false)
 const switchShow = () => {
   dialogTableVisible.value = !dialogTableVisible.value
@@ -9,7 +8,7 @@ const formLabelWidth = '140px'
 // 静态json数据
 const props = defineProps({
   chartData: {
-    type: Object,
+    type: Array,
   },
 })
 const emits = defineEmits(['handlefn'])
@@ -65,7 +64,6 @@ defineExpose({
 <style scoped>
 .inp:deep(.el-input__wrapper) {
   background-color: #fff !important;
-  /* color: black !important; */
   height: 30px !important;
 }
 .inp:deep(.el-input__inner) {

@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import BasicBar from '@/components/echarts/basicBar.vue'
-import BasicLine from '@/components/echarts/basicLine.vue'
-import chinaMap from '@/components/echarts/chinaMap.vue'
-import basichbar from '@/components/echarts/basichbar.vue'
-import basicpie from '@/components/echarts/basicpie.vue'
-import basicDoughnut from '@/components/echarts/basicDoughnut.vue'
+import {
+  BasicBar,
+  BasicLine,
+  ChinaMap,
+  BasicHbar,
+  BasicPie,
+  BasicDoughnut,
+} from '@/components/echarts'
 import { computed, onMounted, reactive, ref, toRefs, watch } from 'vue'
 import { Vue3RulerTool } from 'vue3-ruler-tool'
 import 'vue3-ruler-tool/dist/style.css'
@@ -16,27 +18,10 @@ import { useRoute } from 'vue-router'
 import { useRouter } from 'vue-router'
 import { nextTick } from 'vue'
 import addScreen from '../manage/components/addScreen.vue'
-import codeEditor from './components/codeEditor.vue'
+import jsonDataEditor from './components/jsonDataEditor.vue'
 import Data from '@/utils/jsonData'
-interface Componented {
-  type: ChartType
-  dataOption: {
-    name: string
-    x: number
-    y: number
-    w: number
-    h: number
-    bgcolor: string
-    active: boolean
-    data?: {}
-    id: string
-    chartdata: Array<ChartDataItem>
-  }
-}
-interface ChartDataItem {
-  name: String | Number
-  value: Number
-}
+import type { Componented, ChartDataItem, ChartType, ComponentMap } from '@/types'
+
 // 静态json数据
 let chartData: Array<ChartDataItem> = reactive([...Data])
 const route = useRoute()
@@ -55,14 +40,13 @@ const handleshowData = (value: boolean) => {
 }
 //关于组件
 // 定义动态组件的映射表
-type ChartType = 'line' | 'bar' | 'cn-map' | 'hbar' | 'pie' | 'doughnut'
-const componentMap: object = {
+const componentMap: ComponentMap = {
   line: BasicLine,
   bar: BasicBar,
-  'cn-map': chinaMap,
-  hbar: basichbar,
-  pie: basicpie,
-  doughnut: basicDoughnut,
+  'cn-map': ChinaMap,
+  hbar: BasicHbar,
+  pie: BasicPie,
+  doughnut: BasicDoughnut,
 }
 
 const components = reactive<Componented[]>([])
@@ -82,6 +66,7 @@ const addComponent = (type: ChartType) => {
     },
   })
 }
+// 图表的工具
 type toolType = Array<{
   id: number
   title: string
@@ -179,11 +164,8 @@ const handleBoard = function (value: string) {
   }
 }
 const getOption = (childValue: object, value: Componented) => {
-  console.log('执行了')
-  console.log(value)
   handleActive(value)
   value.dataOption.data = childValue
-  // }
 }
 // 计算属性
 const activeOption = computed(() => {
@@ -207,18 +189,14 @@ onMounted(async () => {
   const {
     data: { data },
   } = await countGetDetail(route.params.id as string)
-  console.log(data, '1111111')
   title.value = data.title
   img = data.image
   boardState.bgcolor = data.chartData.bgcolor
   boardState.w = data.chartData.w
   boardState.h = data.chartData.h
   if (data.chartData.elements) {
-    console.log('执行了111')
-    console.log(data.chartData.elements[1].dataOption.chartdata)
     Object.assign(chartData, data.chartData.elements[1].dataOption.chartdata)
   }
-  console.log(chartData)
   components.push(...data.chartData.elements)
 
   // 如果有全局数据则覆盖
@@ -256,24 +234,23 @@ const generateImageLink = async () => {
     img = canvas.toDataURL('image/png', 1.0)
     // 解构出
     const { w, h, bgcolor } = boardState
-    // console.log({})
     await countPublicChart(
       { chartData: { bgcolor, elements: components, h, w, chartData }, img },
       route.params.id as string,
     )
-    console.log({ chartData: { bgcolor, elements: components, h, w }, img })
     publicControl.value?.ifshow()
   } catch (error) {
     console.error('生成图片失败:', error)
   }
 }
 // ----------------------修改JSON数据-------------------------------
-interface handleDataType {
-  type: string
-  value?: object
-  value2?: number | string
-}
-const ModifyData = ref(null)
+type handleDataType =
+  | { type: 'delete'; value: ChartDataItem }
+  | { type: 'add' }
+  | { type: 'modify_name'; value: ChartDataItem; value2: string | number }
+  | { type: 'modify_value'; value: ChartDataItem; value2: number }
+// ​​作用​​：InstanceType 是 TypeScript 内置工具类型，用于从构造函数（如 Vue 组件）中提取其实例类型
+const ModifyData = ref<InstanceType<typeof jsonDataEditor> | null>(null)
 const handleModifyData = () => {
   if (ModifyData.value) {
     ModifyData.value.switchShow()
@@ -282,37 +259,36 @@ const handleModifyData = () => {
 // 处理具体的删除添加逻辑
 const handleModifyfn = (data: handleDataType) => {
   if (data.type === 'delete') {
-    // console.log(chartData)
-    // console.log(data.value.name)
+    if (!data.value) {
+      return
+    }
     chartData.find((item, index) => {
       if (item.name === data.value.name) {
         chartData.splice(index, 1)
         return true
       }
     })
-  }
-  if (data.type === 'add') {
+  } else if (data.type === 'add') {
     chartData.push({
       name: `data${chartData.length + 1}`,
       value: 546,
     })
-  }
-  if (data.type === 'modify_name') {
+  } else if (data.type === 'modify_name') {
     chartData.find((item, index) => {
       if (item.name === data.value.name) {
         item.name = data.value2
         return true
       }
     })
-  }
-  if (data.type === 'modify_value') {
-    // console.log(data)
+  } else if (data.type === 'modify_value') {
     chartData.find((item, index) => {
       if (item.name === data.value.name) {
         item.value = Number(data.value2)
         return true
       }
     })
+  } else {
+    return false
   }
 }
 </script>
@@ -354,7 +330,11 @@ const handleModifyfn = (data: handleDataType) => {
           <div class="tool-show" v-show="activeId === item.id">
             <div class="title">{{ `${item.title} (${item.list.length})` }}</div>
             <div class="list">
-              <div class="list-item" v-for="item2 in item.list" @click="addComponent(item2.type)">
+              <div
+                class="list-item"
+                v-for="item2 in item.list"
+                @click="addComponent(item2.type as ChartType)"
+              >
                 <img :src="`../../../public${item2.img}`" alt="" />
                 <div class="name">{{ item2.name }}</div>
               </div>
@@ -502,11 +482,11 @@ const handleModifyfn = (data: handleDataType) => {
               <div v-if="selectDateOption === '1'" class="editData" @click="handleModifyData">
                 编辑数据源
               </div>
-              <codeEditor
+              <jsonDataEditor
                 ref="ModifyData"
                 :chartData="chartData"
                 @handlefn="handleModifyfn"
-              ></codeEditor>
+              ></jsonDataEditor>
             </div>
           </div>
         </div>
