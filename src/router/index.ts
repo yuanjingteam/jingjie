@@ -50,6 +50,10 @@ const router = createRouter({
       path: '/view/:id',
       component: () => import('@/views/data/dataView2.vue'),
     },
+    {
+      path: '/ttt',
+      component: () => import('@/views/data/test.vue'),
+    },
   ],
 })
 router.beforeEach((to) => {

@@ -1,84 +1,96 @@
-<script setup lang="ts">
-import { countViewChart } from '@/api/count'
-import { useRoute } from 'vue-router'
-import { onMounted } from 'vue'
-import { ref } from 'vue'
-import basicLine from '@/components/echarts/basicLine.vue'
-import basicBar from '@/components/echarts/basicBar.vue'
-import { useFullscreen } from '@vueuse/core'
-
-// 默认以整个网页为全屏目标，也可指定元素：const el = ref<HTMLElement>()
-const { isFullscreen, toggle } = useFullscreen()
-type ChartType = 'line' | 'bar'
-
-interface DataOption {
-  active: boolean
-  bgcolor: string
-  data: object
-  id: string
-  w: number
-  h: number
-  x: number
-  y: number
-}
-
-interface ChartItem {
-  type: ChartType
-  dataOption: DataOption
-}
-
-const route = useRoute()
-const id: string = route.params.id as string
-const components = ref<ChartItem[]>([])
-
-const componentMap = {
-  line: basicLine,
-  bar: basicBar,
-}
-// 获取信息
-const getDetail = async () => {
-  const {
-    data: {
-      data: {
-        chartData: { elements },
-      },
-    },
-  } = await countViewChart(id)
-  components.value = elements
-}
-onMounted(() => {
-  getDetail()
+<!-- <script setup>
+import { reactive } from 'vue'
+import Data from '@/utils/jsonData'
+import codeEditor from './components/codeEditor.vue'
+const jsonData = reactive([...Data])
+const ttt = reactive({
+  value: {
+    1: 'one',
+    2: 'two',
+  },
 })
+const addnew = () => {
+  ttt.value[3] = 'three'
+  console.log(ttt)
+  jsonData[0].key = 'Mon1'
+  jsonData[0].id = 1
+  jsonData.push(123)
+}
+const addnew2 = () => {
+  ttt.value2 = 'three'
+  console.log(ttt)
+}
+const xiugai = () => {
+  ttt.value2 = '修改后了'
+}
 </script>
 <template>
-  <div class="screen" @click="toggle">切换全屏状态</div>
-  <component
-    v-for="item in components"
-    :key="item.dataOption.id"
-    :is="componentMap[item.type]"
-    v-model:w="item.dataOption.w"
-    v-model:h="item.dataOption.h"
-    :x="item.dataOption.x"
-    :y="item.dataOption.y"
-    v-model:bgcolor="item.dataOption.bgcolor"
-    :state="false"
-  ></component>
+  <div class="test">
+    {{ Object.keys(Data) }}
+    {{ ttt }}
+    {{ ttt.value2 }}
+    <button @click="addnew">添加新属性,最内层，测试是否具有响应式</button>
+    <button @click="addnew2">添加新属性,最外层层，测试是否具有响应式</button>
+    <button @click="xiugai">后续修改，测试是否具有响应性</button>
+    {{ jsonData }}
+  </div>
+  <div class="hua"></div>
+  <codeEditor></codeEditor>
 </template>
 <style scoped>
-.screen {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 80px;
-  line-height: 80px;
-  background: rgba(0, 0, 0, 0.4);
-  color: #fff;
-  text-align: center;
-  font-size: 24px;
-  opacity: 0;
+.test {
+  background-color: pink;
 }
-.screen:hover {
-  opacity: 1;
+.hua {
+  position: relative;
+  z-index: 1;
+  width: 3000px;
+  height: 300px;
+  background-color: pink;
 }
-</style>
+</style> -->
+<template>
+  <button @click="handle">修改data的值</button>
+  <button @click="handle1">添加data的值</button>{{ data }}
+  <test2 :optionData="optionData"></test2>
+</template>
+<script setup>
+import { reactive, computed, watch } from 'vue'
+import test2 from './test2.vue'
+const data = reactive({
+  x: 1,
+  y: 2,
+})
+const handle = () => {
+  data.x = 123
+}
+const handle1 = () => {
+  data.z = 123
+}
+const optionData = computed(() => ({
+  title: 'Weekly Sales',
+  xAxis: data,
+  series: data.y,
+}))
+// 父组件
+// 父组件中添加不可预测的嵌套结构
+// const optionData = computed(() => ({
+//   title: 'Weekly Sales',
+//   xAxis: data,
+//   series: data.y,
+//   ...data,
+//   _hash: {
+//     timestamp: Date.now(),
+//     random: Math.random(), // 增加随机嵌套
+//   },
+// }))
+watch(
+  optionData,
+  () => {
+    console.log('组件件检测到了optionData的变化')
+  },
+  {
+    deep: true,
+  },
+)
+</script>

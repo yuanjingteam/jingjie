@@ -14,7 +14,10 @@ import { useFullscreen } from '@vueuse/core'
 // 默认以整个网页为全屏目标，也可指定元素：const el = ref<HTMLElement>()
 const { isFullscreen, toggle } = useFullscreen()
 type ChartType = 'line' | 'bar' | 'cn-map' | 'hbar' | 'pie' | 'doughnut'
-
+interface ChartDataItem {
+  name: String | Number
+  value: Number
+}
 interface DataOption {
   active: boolean
   bgcolor: string
@@ -24,8 +27,21 @@ interface DataOption {
   h: number
   x: number
   y: number
+  chartdata: Array<ChartDataItem>
 }
 
+// dataOption: {
+//   name: string
+//   x: number
+//   y: number
+//   w: number
+//   h: number
+//   bgcolor: string
+//   active: boolean
+//   data?: {}
+//   id: string
+//   chartdata: Array<ChartDataItem>
+// }
 interface ChartItem {
   type: ChartType
   dataOption: DataOption
@@ -52,6 +68,7 @@ const getDetail = async () => {
       },
     },
   } = await countViewChart(id)
+  console.log(elements)
   components.value = elements
 }
 onMounted(() => {
@@ -70,6 +87,7 @@ onMounted(() => {
     :y="item.dataOption.y"
     v-model:bgcolor="item.dataOption.bgcolor"
     :state="false"
+    :chartData="item.dataOption.chartdata"
   ></component>
 </template>
 <style scoped>

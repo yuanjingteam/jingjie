@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import Vue3DraggableResizable from 'vue3-draggable-resizable-v2'
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { initECharts, type EChartsCoreOption, type ECharts } from '@/utils/echarts'
 import * as echarts from 'echarts/core'
 import chinaGeoJSON from '@/assets/geojson/china.json'
@@ -66,15 +66,14 @@ const props = defineProps({
 const emits = defineEmits(['update:x', 'update:y', 'update:w', 'update:h', 'getOption'])
 // 1. 类型定义（根据实际使用的图表类型调整）
 type ECOption = EChartsCoreOption
-
 // 2. 图表实例管理
 const chartRef = ref<HTMLElement>()
 let chartInstance: ECharts | null = null
-const data = ref({
-  optionData: props.optionData,
-})
+// const data = ref({
+//   optionData: props.optionData,
+// })
 // 3. 配置项（复杂场景建议使用ref）
-const option: ECOption = data.value.optionData
+const option: ECOption = props.optionData
 // 重绘
 const resize = () => {
   if (chartInstance) {
@@ -103,7 +102,7 @@ onMounted(() => {
   const resizeHandler = () => chartInstance?.resize()
   window.addEventListener('resize', resizeHandler)
   // console.log(data.value.optionData)
-  emits('getOption', data.value.optionData)
+  emits('getOption', props.optionData)
   // 自动清理
   onUnmounted(() => {
     window.removeEventListener('resize', resizeHandler)
@@ -122,9 +121,28 @@ const handleResizing = (val: { w: number; h: number }) => {
   emits('update:h', val.h)
   resize()
 }
-defineExpose({
-  data,
-})
+// 监听opionData的变化
+// watch(
+//   props.optionData,
+//   (new1) => {
+//     console.log('props.optionData改变', props.optionData)
+//     console.log(new1)
+//     resize()
+//     emits('getOption', props.optionData)
+//   },
+//   { deep: true },
+// )
+watch(
+  () => props.optionData, // 改用函数返回
+  (new1) => {
+    console.log('子组件监听到变化', new1)
+    chartInstance?.setOption(new1) // 关键：更新图表
+    console.log(props.optionData)
+    emits('getOption', props.optionData)
+    // resize()
+  },
+  { deep: true, immediate: true }, // 补充 immediate 确保初始化触发
+)
 </script>
 
 <style scoped>

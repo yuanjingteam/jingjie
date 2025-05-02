@@ -5,7 +5,7 @@ import chinaMap from '@/components/echarts/chinaMap.vue'
 import basichbar from '@/components/echarts/basichbar.vue'
 import basicpie from '@/components/echarts/basicpie.vue'
 import basicDoughnut from '@/components/echarts/basicDoughnut.vue'
-import { computed, onMounted, reactive, ref, toRefs } from 'vue'
+import { computed, onMounted, reactive, ref, toRefs, watch } from 'vue'
 import { Vue3RulerTool } from 'vue3-ruler-tool'
 import 'vue3-ruler-tool/dist/style.css'
 import { countGetDetail, countPublicChart } from '@/api/count'
@@ -16,6 +16,8 @@ import { useRoute } from 'vue-router'
 import { useRouter } from 'vue-router'
 import { nextTick } from 'vue'
 import addScreen from '../manage/components/addScreen.vue'
+import codeEditor from './components/codeEditor.vue'
+import Data from '@/utils/jsonData'
 interface Componented {
   type: ChartType
   dataOption: {
@@ -28,8 +30,15 @@ interface Componented {
     active: boolean
     data?: {}
     id: string
+    chartdata: Array<ChartDataItem>
   }
 }
+interface ChartDataItem {
+  name: String | Number
+  value: Number
+}
+// 静态json数据
+let chartData: Array<ChartDataItem> = reactive([...Data])
 const route = useRoute()
 const router = useRouter()
 const state = reactive({
@@ -39,9 +48,9 @@ const state = reactive({
   config: 'basic',
   url: `${window.location.origin}/view/${route.params.id}`,
 })
-const handleshowData = (vale: boolean) => {
+const handleshowData = (value: boolean) => {
   if (components.length !== 0) {
-    state.showdata = vale
+    state.showdata = value
   }
 }
 //关于组件
@@ -69,6 +78,7 @@ const addComponent = (type: ChartType) => {
       bgcolor: 'rgba(0,0,0,0)',
       active: false,
       id: uuidv4(),
+      chartdata: [...chartData],
     },
   })
 }
@@ -169,6 +179,8 @@ const handleBoard = function (value: string) {
   }
 }
 const getOption = (childValue: object, value: Componented) => {
+  console.log('执行了')
+  console.log(value)
   handleActive(value)
   value.dataOption.data = childValue
   // }
@@ -195,14 +207,35 @@ onMounted(async () => {
   const {
     data: { data },
   } = await countGetDetail(route.params.id as string)
-  console.log(data)
+  console.log(data, '1111111')
   title.value = data.title
   img = data.image
   boardState.bgcolor = data.chartData.bgcolor
   boardState.w = data.chartData.w
   boardState.h = data.chartData.h
+  if (data.chartData.elements) {
+    console.log('执行了111')
+    console.log(data.chartData.elements[1].dataOption.chartdata)
+    Object.assign(chartData, data.chartData.elements[1].dataOption.chartdata)
+  }
+  console.log(chartData)
   components.push(...data.chartData.elements)
+
+  // 如果有全局数据则覆盖
+  if (data.chartData.globalChartData) {
+    chartData.splice(0, chartData.length, ...data.chartData.globalChartData)
+  }
 })
+// 修改5: 添加全局数据监听（根据需要）
+const stopWatch = watch(
+  () => chartData,
+  (newVal) => {
+    components.forEach((component) => {
+      component.dataOption.chartdata = [...newVal]
+    })
+  },
+  { deep: true },
+)
 // 发布逻辑
 const publicControl = ref<{ ifshow: () => void } | null>(null)
 const generateImageLink = async () => {
@@ -225,15 +258,63 @@ const generateImageLink = async () => {
     const { w, h, bgcolor } = boardState
     // console.log({})
     await countPublicChart(
-      { chartData: { bgcolor, elements: components, h, w }, img },
+      { chartData: { bgcolor, elements: components, h, w, chartData }, img },
       route.params.id as string,
     )
+    console.log({ chartData: { bgcolor, elements: components, h, w }, img })
     publicControl.value?.ifshow()
   } catch (error) {
     console.error('生成图片失败:', error)
   }
 }
-console.log(window.location)
+// ----------------------修改JSON数据-------------------------------
+interface handleDataType {
+  type: string
+  value?: object
+  value2?: number | string
+}
+const ModifyData = ref(null)
+const handleModifyData = () => {
+  if (ModifyData.value) {
+    ModifyData.value.switchShow()
+  }
+}
+// 处理具体的删除添加逻辑
+const handleModifyfn = (data: handleDataType) => {
+  if (data.type === 'delete') {
+    // console.log(chartData)
+    // console.log(data.value.name)
+    chartData.find((item, index) => {
+      if (item.name === data.value.name) {
+        chartData.splice(index, 1)
+        return true
+      }
+    })
+  }
+  if (data.type === 'add') {
+    chartData.push({
+      name: `data${chartData.length + 1}`,
+      value: 546,
+    })
+  }
+  if (data.type === 'modify_name') {
+    chartData.find((item, index) => {
+      if (item.name === data.value.name) {
+        item.name = data.value2
+        return true
+      }
+    })
+  }
+  if (data.type === 'modify_value') {
+    // console.log(data)
+    chartData.find((item, index) => {
+      if (item.name === data.value.name) {
+        item.value = Number(data.value2)
+        return true
+      }
+    })
+  }
+}
 </script>
 <template>
   <div class="basic-dots">
@@ -301,6 +382,7 @@ console.log(window.location)
               v-model:x="item.dataOption.x"
               v-model:y="item.dataOption.y"
               v-model:bgcolor="item.dataOption.bgcolor"
+              v-model:chartData="chartData"
               @getOption="(childValue: object) => getOption(childValue, item)"
               @click.stop="handleActive(item)"
             ></component>
@@ -417,6 +499,14 @@ console.log(window.location)
                 <el-option label="我的数据源" value="2" />
                 <el-option label="GET接口" value="2" />
               </el-select>
+              <div v-if="selectDateOption === '1'" class="editData" @click="handleModifyData">
+                编辑数据源
+              </div>
+              <codeEditor
+                ref="ModifyData"
+                :chartData="chartData"
+                @handlefn="handleModifyfn"
+              ></codeEditor>
             </div>
           </div>
         </div>
@@ -425,6 +515,7 @@ console.log(window.location)
     <addScreen ref="publicControl" :url="state.url"></addScreen>
   </div>
 </template>
+
 <style scoped lang="scss">
 .basic-dots {
   background-color: #2a2e33;
@@ -603,6 +694,7 @@ content {
   }
   .tool-right {
     position: fixed;
+    z-index: 1;
     right: 0;
     width: 300px;
     height: 100%;
@@ -641,6 +733,13 @@ content {
       }
       :deep(.el-select__placeholder) {
         color: #fff;
+      }
+      .editData {
+        display: inline-block;
+        padding: 5px;
+        margin: 20px auto;
+        color: #409eff;
+        border: 1px solid #409eff;
       }
       p {
         white-space: pre-wrap;

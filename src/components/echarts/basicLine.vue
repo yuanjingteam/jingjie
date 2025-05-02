@@ -3,20 +3,35 @@
 </template>
 <script setup lang="ts">
 import publicVue from '../publicVue.vue'
-const optionData = {
-  title: { text: 'Weekly Sales' },
-  tooltip: { trigger: 'axis' },
-  xAxis: {
-    type: 'category',
-    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-  },
-  yAxis: { type: 'value' },
-  series: [
-    {
-      data: [150, 230, 224, 218, 135, 147, 260],
-      type: 'line',
-      smooth: true,
-    },
-  ],
+import { computed, reactive, watch } from 'vue'
+interface ChartDataItem {
+  name: String | Number
+  value: Number
 }
+const props = defineProps({
+  chartData: {
+    type: Array<ChartDataItem>,
+    required: true,
+  },
+})
+const categories = computed(() => props.chartData.map((item: ChartDataItem) => item.name))
+const values = computed(() => props.chartData.map((item: ChartDataItem) => item.value))
+const optionData = computed(() => {
+  return {
+    title: { text: 'Weekly Sales' },
+    tooltip: { trigger: 'axis' },
+    xAxis: {
+      type: 'category',
+      data: categories.value,
+    },
+    yAxis: { type: 'value' },
+    series: [
+      {
+        data: values.value,
+        type: 'line',
+        smooth: true,
+      },
+    ],
+  }
+})
 </script>
