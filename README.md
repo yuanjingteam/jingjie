@@ -20,6 +20,7 @@
 - uuid
 
 ## 项目结构
+```
 ├─ public # 静态资源
 ├─ src
 |   ├─ api # 接口模块
@@ -46,6 +47,7 @@
 │       └─ manage # 管理系统
 ├─ tsconfig.json # ts 编译配置
 └─ vite.config.js  # vue-cli 配置
+```
 ## 快速开始
 ```
 #通过 npm 安装 pnpm (如果本地已安装pnpm,请忽略)
