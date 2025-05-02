@@ -13,7 +13,6 @@ instance.interceptors.request.use(
   (config) => {
     // TODO 2. 携带token
     const userStore = useUserStore()
-    // console.log('Token type:', typeof userStore.token)
     if (userStore.token) {
       config.headers.Authorization = userStore.token
     }
@@ -26,8 +25,6 @@ instance.interceptors.response.use(
   // 这是处理业务的成功或者失败
   (res) => {
     if (res.data.errno === 0) {
-      // console.log(res)
-      // console.log(res.response)
       return res
     }
     // TODO 3. 处理业务失败，给错误提示，抛出错误
@@ -48,11 +45,6 @@ instance.interceptors.response.use(
     if (err.response?.status === 401) {
       router.push('/login')
     }
-    // console.log(111)
-    // console.log(err.response)
-    console.log(err.message)
-    // ElMessage.error('111')
-    // ElMessage.error(err.response?.data.message || '服务异常')
     ElMessage.error(err.message || '服务异常')
 
     return Promise.reject(err)
