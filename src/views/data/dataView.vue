@@ -16,7 +16,7 @@ import {
 import { useFullscreen } from '@vueuse/core'
 
 // 默认以整个网页为全屏目标，也可指定元素：const el = ref<HTMLElement>()
-const { isFullscreen, toggle } = useFullscreen()
+const { toggle } = useFullscreen()
 
 const route = useRoute()
 const id: string = route.params.id as string
